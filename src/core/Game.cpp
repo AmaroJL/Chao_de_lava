@@ -119,7 +119,7 @@ void Game::resolvePlayerCollision(float prevX, float prevY, float prevZ) {
 
 // Cria o chão do jogo
 void Game::CreateGround() {
-    inicializarCenario();
+    initializeScenario();
 
     GLfloat mat_ambient_lava[]   = { 0.8f, 0.2f, 0.0f, 1.0f }; 
     GLfloat mat_diffuse_lava[]   = { 0.9f, 0.3f, 0.0f, 1.0f };
@@ -243,7 +243,7 @@ void Game::initializeScenario() {
     for (const auto& p : listaPedras) {
         worldBoxes.push_back(createAABB(
             p.x,
-            4.5f,                    
+            4.0f,                    
             p.z,
             p.largura / 2.0f,
             0.5f,                    
