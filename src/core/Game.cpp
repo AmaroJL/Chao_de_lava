@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #include <math.h>
 #include <algorithm>
+#include <vector>
 
 #include "Game.h"
 
@@ -11,6 +12,13 @@ inicialização, renderização e atualização de posição
 
 Game::Game() {}
 Game::~Game() {}
+
+struct Pedra {
+    float x, z;            // Posição no mundo 3D (centro da pedra)
+    float largura;         // Tamanho no eixo X
+    float profundidade;    // Tamanho no eixo z
+};
+std::vector<Pedra> listaPedras;
 
 // Inicializa e configura o jogo
 void Game::Init() {
@@ -104,25 +112,51 @@ void Game::resolvePlayerCollision(float prevX, float prevY, float prevZ) {
 
 // Cria o chão do jogo
 void Game::CreateGround() {
-    // glNormal3f(0.0f, 1.0f, 0.0f);
+    inicializarCenario();
 
-    // glColor3f(0.2f, 0.6f, 0.2f);
-    // glBegin(GL_QUADS);
-    //     glVertex3f(-500.0f, -2.0f, -500.0f);
-    //     glVertex3f(-500.0f, -2.0f,  500.0f);
-    //     glVertex3f( 500.0f, -2.0f,  500.0f);
-    //     glVertex3f( 500.0f, -2.0f, -500.0f);
-    // glEnd();
+    GLfloat mat_ambient_lava[]   = { 0.8f, 0.2f, 0.0f, 1.0f }; 
+    GLfloat mat_diffuse_lava[]   = { 0.9f, 0.3f, 0.0f, 1.0f };
+    GLfloat mat_specular_lava[]  = { 0.8f, 0.8f, 0.8f, 1.0f }; 
+    GLfloat mat_shininess_lava[] = { 80.0f };
+    
+    // Faz o objeto parecer que emite luz própria!
+    GLfloat mat_emission_lava[]  = { 0.4f, 0.1f, 0.0f, 1.0f }; 
 
-    // glColor3f(0.1f, 0.4f, 0.1f);
-    // glBegin(GL_LINES);
-    //     for(float i = -500; i <= 500; i += 2.0f) {
-    //         glVertex3f(i, -1.99f, -500.0f);
-    //         glVertex3f(i, -1.99f,  500.0f);
-    //         glVertex3f(-500.0f, -1.99f, i);
-    //         glVertex3f( 500.0f, -1.99f, i);
-    //     }
-    // glEnd();
+    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient_lava);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse_lava);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular_lava);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess_lava);
+    glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission_lava);
+
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f); 
+        glVertex3f(-100.0f, 0.3f,  200.0f/2);
+        glVertex3f( 100.0f, 0.3f,  200.0f/2);
+        glVertex3f( 100.0f, 0.3f, -200.0f);
+        glVertex3f(-100.0f, 0.3f, -200.0f);
+    glEnd();
+
+    GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
+    
+    // Pedras
+    GLfloat mat_ambient[]   = { 0.2f, 0.2f, 0.2f, 1.0f }; 
+    GLfloat mat_diffuse[]   = { 0.5f, 0.5f, 0.5f, 1.0f }; 
+    GLfloat mat_specular[]  = { 0.1f, 0.1f, 0.1f, 1.0f }; 
+    GLfloat mat_shininess[] = { 10.0f };                 
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
+    for (const auto& p : listaPedras) {
+        glPushMatrix();
+            glTranslatef(p.x, 4.0f, p.z); 
+            glScalef(p.largura, 1.0f, p.profundidade); 
+            glutSolidCube(1.0);
+        glPopMatrix();
+    }
 }
 
 // Renderiza os elementos do jogo
@@ -148,6 +182,56 @@ void Game::Render() {
     player.Render();
 
     glutSwapBuffers();
+}
+
+// Funções auxiliares para criação do mapa
+
+const std::vector<Pedra>& getPedras() {
+    return listaPedras;
+}
+
+void Game::inicializarCenario() {
+    listaPedras.clear();
+
+    listaPedras.push_back({0.0f,   0.0f,  5.0f, 5.0f}); 
+    listaPedras.push_back({0.0f,  -6.0f,  3.0f, 3.0f}); 
+    listaPedras.push_back({0.0f, -12.0f,  3.0f, 3.0f}); 
+
+    listaPedras.push_back({-5.0f, -18.0f,  2.5f, 2.5f}); 
+    listaPedras.push_back({-8.0f, -24.0f,  2.5f, 2.5f}); 
+    listaPedras.push_back({-5.0f, -30.0f,  2.5f, 2.5f}); 
+
+    listaPedras.push_back({ 6.0f, -19.0f,  1.5f, 1.5f}); 
+    listaPedras.push_back({ 8.0f, -26.0f,  1.5f, 1.5f}); 
+    listaPedras.push_back({ 5.0f, -31.0f,  1.5f, 1.5f}); 
+
+    listaPedras.push_back({ 0.0f, -36.0f,  4.0f, 4.0f}); 
+
+    listaPedras.push_back({ 6.0f, -41.0f,  3.0f, 3.0f}); 
+    listaPedras.push_back({12.0f, -46.0f,  3.0f, 3.0f}); 
+    listaPedras.push_back({17.0f, -51.0f,  4.0f, 4.0f}); 
+    listaPedras.push_back({12.0f, -56.0f,  2.0f, 2.0f}); 
+    listaPedras.push_back({ 4.0f, -61.0f,  2.0f, 2.0f}); 
+    listaPedras.push_back({-4.0f, -66.0f,  2.0f, 2.0f}); 
+    listaPedras.push_back({-12.0f,-71.0f,  3.0f, 3.0f}); 
+    listaPedras.push_back({-17.0f,-76.0f,  4.0f, 4.0f}); 
+    listaPedras.push_back({-8.0f, -81.0f,  2.0f, 2.0f}); 
+
+    listaPedras.push_back({ 0.0f, -88.0f,  8.0f, 8.0f});
+
+    listaPedras.push_back({-3.0f, -95.0f,  1.5f, 1.5f});
+    listaPedras.push_back({ 3.0f, -97.0f,  2.0f, 2.0f});
+    listaPedras.push_back({-2.0f,-102.0f,  1.0f, 1.0f});
+    listaPedras.push_back({ 4.0f,-105.0f,  1.5f, 1.5f});
+    listaPedras.push_back({ 0.0f,-110.0f,  2.0f, 2.0f});
+
+    listaPedras.push_back({ 0.0f,-116.0f,  3.0f, 3.0f}); 
+    listaPedras.push_back({ 0.0f,-123.0f,  2.0f, 2.0f}); 
+    listaPedras.push_back({ 0.0f,-131.0f,  1.5f, 1.5f}); 
+    listaPedras.push_back({ 0.0f,-140.0f,  1.0f, 1.0f}); 
+
+
+    listaPedras.push_back({ 0.0f,-150.0f, 15.0f, 10.0f}); 
 }
 
 // Trata teclas pressionadas
