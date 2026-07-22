@@ -2,6 +2,7 @@
 #include <math.h>
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 #include "Game.h"
 
@@ -80,8 +81,14 @@ void Game::Update() {
     float prevZ = player.z;
 
     player.Update(&input, moveX, moveZ);
-
     resolvePlayerCollision(prevX, prevY, prevZ);
+
+    if (player.y < 0.1f) {
+        std::cout << "GAME OVER!" << std::endl;
+        player.x = 0.0f;
+        player.y = 5.0f;
+        player.z = 0.0f;
+    }
 }
 
 // Resolve colisões do jogador com o mundo
@@ -190,7 +197,7 @@ const std::vector<Pedra>& getPedras() {
     return listaPedras;
 }
 
-void Game::inicializarCenario() {
+void Game::initializeScenario() {
     listaPedras.clear();
 
     listaPedras.push_back({0.0f,   0.0f,  5.0f, 5.0f}); 
@@ -232,6 +239,17 @@ void Game::inicializarCenario() {
 
 
     listaPedras.push_back({ 0.0f,-150.0f, 15.0f, 10.0f}); 
+
+    for (const auto& p : listaPedras) {
+        worldBoxes.push_back(createAABB(
+            p.x,
+            4.5f,                    
+            p.z,
+            p.largura / 2.0f,
+            0.5f,                    
+            p.profundidade / 2.0f
+        ));
+    }
 }
 
 // Trata teclas pressionadas

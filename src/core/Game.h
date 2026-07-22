@@ -35,7 +35,7 @@ public:
 
 private:
     void CreateGround();
-    void inicializarCenario();
+    void initializeScenario();
     void resolvePlayerCollision(float prevX, float prevY, float prevZ);
 };
 

@@ -5,7 +5,7 @@
 
 Player::Player() {
     x = 0.0f;
-    y = -2.0f;
+    y = 5.0f;
     z = 0.0f;
     yaw = 0.0f;
     velY = 0.0f;
