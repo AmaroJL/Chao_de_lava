@@ -104,25 +104,25 @@ void Game::resolvePlayerCollision(float prevX, float prevY, float prevZ) {
 
 // Cria o chão do jogo
 void Game::CreateGround() {
-    glNormal3f(0.0f, 1.0f, 0.0f);
+    // glNormal3f(0.0f, 1.0f, 0.0f);
 
-    glColor3f(0.2f, 0.6f, 0.2f);
-    glBegin(GL_QUADS);
-        glVertex3f(-500.0f, -2.0f, -500.0f);
-        glVertex3f(-500.0f, -2.0f,  500.0f);
-        glVertex3f( 500.0f, -2.0f,  500.0f);
-        glVertex3f( 500.0f, -2.0f, -500.0f);
-    glEnd();
+    // glColor3f(0.2f, 0.6f, 0.2f);
+    // glBegin(GL_QUADS);
+    //     glVertex3f(-500.0f, -2.0f, -500.0f);
+    //     glVertex3f(-500.0f, -2.0f,  500.0f);
+    //     glVertex3f( 500.0f, -2.0f,  500.0f);
+    //     glVertex3f( 500.0f, -2.0f, -500.0f);
+    // glEnd();
 
-    glColor3f(0.1f, 0.4f, 0.1f);
-    glBegin(GL_LINES);
-        for(float i = -500; i <= 500; i += 2.0f) {
-            glVertex3f(i, -1.99f, -500.0f);
-            glVertex3f(i, -1.99f,  500.0f);
-            glVertex3f(-500.0f, -1.99f, i);
-            glVertex3f( 500.0f, -1.99f, i);
-        }
-    glEnd();
+    // glColor3f(0.1f, 0.4f, 0.1f);
+    // glBegin(GL_LINES);
+    //     for(float i = -500; i <= 500; i += 2.0f) {
+    //         glVertex3f(i, -1.99f, -500.0f);
+    //         glVertex3f(i, -1.99f,  500.0f);
+    //         glVertex3f(-500.0f, -1.99f, i);
+    //         glVertex3f( 500.0f, -1.99f, i);
+    //     }
+    // glEnd();
 }
 
 // Renderiza os elementos do jogo
