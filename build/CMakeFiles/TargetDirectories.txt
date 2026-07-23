@@ -1,3 +1,0 @@
-/home/amarojl/jogo/Chao_de_lava/build/CMakeFiles/RioDeLava.dir
-/home/amarojl/jogo/Chao_de_lava/build/CMakeFiles/edit_cache.dir
-/home/amarojl/jogo/Chao_de_lava/build/CMakeFiles/rebuild_cache.dir

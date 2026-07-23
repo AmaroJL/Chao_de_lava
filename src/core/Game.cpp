@@ -46,16 +46,6 @@ void Game::Init() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0f, 800.0f/500.0f, 0.1f, 100.0f);
-
-    wall.load("assets/models/wall.obj");
-
-    AABB hitBoxWall = wall.hitBox;
-    hitBoxWall.minX += 0.0f; hitBoxWall.maxX += 0.0f;
-    hitBoxWall.minY += -2.0f; hitBoxWall.maxY += -2.0f;
-    hitBoxWall.minZ += -5.0f; hitBoxWall.maxZ += -5.0f;
-    worldBoxes.push_back(hitBoxWall);
-
-    worldBoxes.push_back(createAABB(0.0f, -3.0f, 0.0f, 500.0f, 1.0f, 500.0f));
 }
 
 // Atualiza a posição do jogador a partir das teclas WASD
@@ -183,7 +173,6 @@ void Game::Render() {
     glPushMatrix();
         glTranslatef(0.0f, -2.0f, -5.0f);
         glColor3f(0.8f, 0.8f, 0.8f);
-        wall.draw();
     glPopMatrix();
 
     player.Render();
