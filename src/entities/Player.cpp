@@ -26,7 +26,7 @@ void Player::Update(Input *input, float moveX, float moveZ) {
     float charSpeed = 0.15f;
 
     if (input->IsKeyPressed(' ') && onGround) {
-        velY = 0.40f;
+        velY = 0.50f;
         onGround = false;
     }
     

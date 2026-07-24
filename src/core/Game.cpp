@@ -15,11 +15,12 @@ Game::Game() {}
 Game::~Game() {}
 
 struct Pedra {
-    float x, z;            // Posição no mundo 3D (centro da pedra)
-    float largura;         // Tamanho no eixo X
-    float profundidade;    // Tamanho no eixo z
+    float x, y, z;            
+    float largura;         
+    float profundidade;    
 };
 std::vector<Pedra> listaPedras;
+float mapY = 0.3f;
 
 // Inicializa e configura o jogo
 void Game::Init() {
@@ -73,11 +74,22 @@ void Game::Update() {
     player.Update(&input, moveX, moveZ);
     resolvePlayerCollision(prevX, prevY, prevZ);
 
+    mapY += 0.00041f;
     if (player.y < 0.1f) {
         std::cout << "GAME OVER!" << std::endl;
         player.x = 0.0f;
         player.y = 5.0f;
         player.z = 0.0f;
+    } else if (mapY > player.y + 0.3f && player.velY == 0) {
+        mapY = 0.3f;
+        player.x = 0.0f;
+        player.y = 5.0f;
+        player.z = 0.0f;
+    }
+    if (player.z == -135.0f && player.y == 4.0f && player.velY == 0) {
+        std::cout << "\n=================================================" << std::endl;
+        std::cout << "    VITORIA! VOCE ESCAPOU DO RIO DE LAVA!     " << std::endl;
+        std::cout << "=================================================\n" << std::endl;
     }
 }
 
@@ -127,10 +139,10 @@ void Game::CreateGround() {
 
     glBegin(GL_QUADS);
         glNormal3f(0.0f, 1.0f, 0.0f); 
-        glVertex3f(-100.0f, 0.3f,  200.0f/2);
-        glVertex3f( 100.0f, 0.3f,  200.0f/2);
-        glVertex3f( 100.0f, 0.3f, -200.0f);
-        glVertex3f(-100.0f, 0.3f, -200.0f);
+        glVertex3f(-100.0f, mapY,  200.0f/2);
+        glVertex3f( 100.0f, mapY,  200.0f/2);
+        glVertex3f( 100.0f, mapY, -200.0f);
+        glVertex3f(-100.0f, mapY, -200.0f);
     glEnd();
 
     GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -149,7 +161,7 @@ void Game::CreateGround() {
 
     for (const auto& p : listaPedras) {
         glPushMatrix();
-            glTranslatef(p.x, 4.0f, p.z); 
+            glTranslatef(p.x, p.y, p.z); 
             glScalef(p.largura, 1.0f, p.profundidade); 
             glutSolidCube(1.0);
         glPopMatrix();
@@ -189,50 +201,48 @@ const std::vector<Pedra>& getPedras() {
 void Game::initializeScenario() {
     listaPedras.clear();
 
-    listaPedras.push_back({0.0f,   0.0f,  5.0f, 5.0f}); 
-    listaPedras.push_back({0.0f,  -6.0f,  3.0f, 3.0f}); 
-    listaPedras.push_back({0.0f, -12.0f,  3.0f, 3.0f}); 
+    listaPedras.push_back({ 0.0f, 4.0f,   0.0f,  5.0f,  5.0f}); 
+    listaPedras.push_back({ 0.0f, 4.0f,  -5.0f,  3.0f,  3.0f}); 
+    listaPedras.push_back({ 0.0f, 4.5f, -10.0f,  3.0f,  3.0f}); 
 
-    listaPedras.push_back({-5.0f, -18.0f,  2.5f, 2.5f}); 
-    listaPedras.push_back({-8.0f, -24.0f,  2.5f, 2.5f}); 
-    listaPedras.push_back({-5.0f, -30.0f,  2.5f, 2.5f}); 
+    listaPedras.push_back({-3.0f, 5.5f, -14.0f,  2.5f,  2.5f}); 
+    listaPedras.push_back({-6.0f, 6.5f, -18.0f,  2.5f,  2.5f}); 
+    listaPedras.push_back({-3.0f, 7.5f, -22.0f,  2.5f,  2.5f}); 
 
-    listaPedras.push_back({ 6.0f, -19.0f,  1.5f, 1.5f}); 
-    listaPedras.push_back({ 8.0f, -26.0f,  1.5f, 1.5f}); 
-    listaPedras.push_back({ 5.0f, -31.0f,  1.5f, 1.5f}); 
+    listaPedras.push_back({ 0.0f, 4.0f, -27.0f,  4.0f,  4.0f}); 
 
-    listaPedras.push_back({ 0.0f, -36.0f,  4.0f, 4.0f}); 
+    listaPedras.push_back({ 5.0f, 4.0f, -32.0f,  2.5f,  2.5f}); 
+    listaPedras.push_back({ 9.0f, 4.0f, -37.0f,  2.5f,  2.5f}); 
+    listaPedras.push_back({ 5.0f, 4.0f, -42.0f,  2.5f,  2.5f}); 
 
-    listaPedras.push_back({ 6.0f, -41.0f,  3.0f, 3.0f}); 
-    listaPedras.push_back({12.0f, -46.0f,  3.0f, 3.0f}); 
-    listaPedras.push_back({17.0f, -51.0f,  4.0f, 4.0f}); 
-    listaPedras.push_back({12.0f, -56.0f,  2.0f, 2.0f}); 
-    listaPedras.push_back({ 4.0f, -61.0f,  2.0f, 2.0f}); 
-    listaPedras.push_back({-4.0f, -66.0f,  2.0f, 2.0f}); 
-    listaPedras.push_back({-12.0f,-71.0f,  3.0f, 3.0f}); 
-    listaPedras.push_back({-17.0f,-76.0f,  4.0f, 4.0f}); 
-    listaPedras.push_back({-8.0f, -81.0f,  2.0f, 2.0f}); 
+    listaPedras.push_back({-4.0f, 5.0f, -32.0f,  1.5f,  1.5f}); 
+    listaPedras.push_back({-8.0f, 6.0f, -37.0f,  1.5f,  1.5f}); 
+    listaPedras.push_back({-4.0f, 7.0f, -42.0f,  1.5f,  1.5f}); 
 
-    listaPedras.push_back({ 0.0f, -88.0f,  8.0f, 8.0f});
+    listaPedras.push_back({ 0.0f, 4.0f, -50.0f,  8.0f,  8.0f}); 
 
-    listaPedras.push_back({-3.0f, -95.0f,  1.5f, 1.5f});
-    listaPedras.push_back({ 3.0f, -97.0f,  2.0f, 2.0f});
-    listaPedras.push_back({-2.0f,-102.0f,  1.0f, 1.0f});
-    listaPedras.push_back({ 4.0f,-105.0f,  1.5f, 1.5f});
-    listaPedras.push_back({ 0.0f,-110.0f,  2.0f, 2.0f});
+    listaPedras.push_back({-8.0f, 5.0f, -56.0f,  3.0f,  3.0f}); 
+    listaPedras.push_back({-14.0f, 6.0f, -62.0f,  3.0f,  3.0f}); 
+    listaPedras.push_back({-8.0f, 7.0f, -68.0f,  2.0f,  2.0f}); 
+    listaPedras.push_back({ 0.0f, 8.5f, -74.0f,  2.0f,  2.0f}); 
+    listaPedras.push_back({ 8.0f, 7.0f, -80.0f,  3.0f,  3.0f}); 
+    listaPedras.push_back({14.0f, 5.0f, -86.0f,  3.0f,  3.0f}); 
 
-    listaPedras.push_back({ 0.0f,-116.0f,  3.0f, 3.0f}); 
-    listaPedras.push_back({ 0.0f,-123.0f,  2.0f, 2.0f}); 
-    listaPedras.push_back({ 0.0f,-131.0f,  1.5f, 1.5f}); 
-    listaPedras.push_back({ 0.0f,-140.0f,  1.0f, 1.0f}); 
+    listaPedras.push_back({ 6.0f, 4.5f, -92.0f,  2.0f,  2.0f});
+    listaPedras.push_back({ 0.0f, 5.5f, -97.0f,  1.5f,  1.5f}); 
+    listaPedras.push_back({-4.0f, 6.5f,-102.0f,  1.5f,  1.5f});
+    listaPedras.push_back({ 0.0f, 4.5f,-107.0f,  1.5f,  1.5f}); 
 
+    listaPedras.push_back({ 0.0f, 5.5f,-113.0f,  2.0f,  2.0f});
+    listaPedras.push_back({ 0.0f, 6.5f,-119.0f,  2.0f,  2.0f});
+    listaPedras.push_back({ 0.0f, 7.5f,-125.0f,  1.5f,  1.5f}); 
 
-    listaPedras.push_back({ 0.0f,-150.0f, 15.0f, 10.0f}); 
+    listaPedras.push_back({ 0.0f, 4.0f,-135.0f, 15.0f, 10.0f});
 
     for (const auto& p : listaPedras) {
         worldBoxes.push_back(createAABB(
             p.x,
-            4.0f,                    
+            p.y,                     
             p.z,
             p.largura / 2.0f,
             0.5f,                    
