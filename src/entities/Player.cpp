@@ -103,7 +103,8 @@ void Player::Render() {
     glTranslatef(x, y, z);
     glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 
-    glColor3f(0.92f, 0.92f, 0.92f);
+    GLfloat mat_corpo[] = { 0.92f, 0.92f, 0.92f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_corpo);
     glPushMatrix();
 
     // Perna esquerda
@@ -208,7 +209,8 @@ void Player::Render() {
     glutSolidSphere(0.30f, 24, 24);
 
     // Olhos
-    glColor3f(0.0f, 0.0f, 0.0f);
+    GLfloat mat_olhos[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_olhos);
     glPushMatrix();
         glTranslatef(-0.1f, 0.05f, 0.27f);
         glutSolidSphere(0.04f, 24, 24);
@@ -221,7 +223,8 @@ void Player::Render() {
 
     // Chapéu
     glPushMatrix();
-        glColor3f(0.05f, 0.05f, 0.05f);
+        GLfloat mat_chapeu[] = { 0.05f, 0.05f, 0.05f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_chapeu);
 
         glTranslatef(0.0f, 0.22f, 0.0f);
         glPushMatrix();

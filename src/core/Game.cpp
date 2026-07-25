@@ -29,8 +29,7 @@ void Game::Init() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_NORMALIZE);
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+   
 
     GLfloat ambient_global[] = { 0.15f, 0.18f, 0.25f, 1.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_global);
@@ -123,12 +122,12 @@ void Game::resolvePlayerCollision(float prevX, float prevY, float prevZ) {
 void Game::CreateGround() {
     initializeScenario();
 
+    // Desenha o Chão de Lava
     GLfloat mat_ambient_lava[]   = { 0.8f, 0.2f, 0.0f, 1.0f }; 
     GLfloat mat_diffuse_lava[]   = { 0.9f, 0.3f, 0.0f, 1.0f };
     GLfloat mat_specular_lava[]  = { 0.8f, 0.8f, 0.8f, 1.0f }; 
     GLfloat mat_shininess_lava[] = { 80.0f };
     
-    // Faz o objeto parecer que emite luz própria!
     GLfloat mat_emission_lava[]  = { 0.4f, 0.1f, 0.0f, 1.0f }; 
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient_lava);
@@ -145,21 +144,37 @@ void Game::CreateGround() {
         glVertex3f(-100.0f, mapY, -200.0f);
     glEnd();
 
+    // Tira a emissão de luz das plataformas
     GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
     
-    // Pedras
-    GLfloat mat_ambient[]   = { 0.2f, 0.2f, 0.2f, 1.0f }; 
-    GLfloat mat_diffuse[]   = { 0.5f, 0.5f, 0.5f, 1.0f }; 
+    // Desenha as plataformas
     GLfloat mat_specular[]  = { 0.1f, 0.1f, 0.1f, 1.0f }; 
     GLfloat mat_shininess[] = { 10.0f };                 
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
-    for (const auto& p : listaPedras) {
+    // Cores das plataformas
+    GLfloat corAzul[]    = { 0.0f, 0.0f, 1.0f, 1.0f };
+    GLfloat corAmarelo[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat corVerde[]   = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+    for (size_t i = 0; i < listaPedras.size(); i++) {
+        const auto& p = listaPedras[i];
+
+        // Alterna a cor
+        if (i % 3 == 0) {
+            glMaterialfv(GL_FRONT, GL_AMBIENT, corAzul);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, corAzul);
+        } else if (i % 3 == 1) {
+            glMaterialfv(GL_FRONT, GL_AMBIENT, corAmarelo);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, corAmarelo);
+        } else {
+            glMaterialfv(GL_FRONT, GL_AMBIENT, corVerde);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, corVerde);
+        }
+
         glPushMatrix();
             glTranslatef(p.x, p.y, p.z); 
             glScalef(p.largura, 1.0f, p.profundidade); 
@@ -184,7 +199,6 @@ void Game::Render() {
 
     glPushMatrix();
         glTranslatef(0.0f, -2.0f, -5.0f);
-        glColor3f(0.8f, 0.8f, 0.8f);
     glPopMatrix();
 
     player.Render();
