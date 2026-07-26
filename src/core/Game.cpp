@@ -197,12 +197,42 @@ void Game::Render() {
 
     CreateGround();
 
-    glPushMatrix();
-        glTranslatef(0.0f, -2.0f, -5.0f);
-    glPopMatrix();
-
     player.Render();
 
+    
+    glDisable(GL_LIGHTING); // Desativa a luz para a sombra ficar sólida e escura
+    glColor3f(0.1f, 0.1f, 0.1f); // Cor da sombra (cinza quase preto)
+
+    glPushMatrix();
+        
+        // Pega a direção da luz 
+        float Lx = 0.6f;
+        float Ly = 1.0f;
+        float Lz = 0.5f;
+
+        // Lógica para a sombra não pular junto com o boneco
+        static float alturaSombra = 4.0f;
+        if (player.velY == 0.0f) { 
+            alturaSombra = player.y; 
+        }
+
+        glTranslatef(0.0f, alturaSombra + 0.01f, 0.0f);
+
+        GLfloat matrizSombra[16] = {
+             1.0f,     0.0f,    0.0f,    0.0f,
+            -Lx/Ly,    0.0f,   -Lz/Ly,   0.0f,
+             0.0f,     0.0f,    1.0f,    0.0f,
+             0.0f,     0.0f,    0.0f,    1.0f
+        };
+        glMultMatrixf(matrizSombra);
+
+        glTranslatef(0.0f, -alturaSombra, 0.0f);
+
+        player.Render();
+
+    glPopMatrix();
+
+    glEnable(GL_LIGHTING);
     glutSwapBuffers();
 }
 
