@@ -306,7 +306,7 @@ void Game::initializeScenario() {
 
 void Game::carregarTexturaLava() {
     // abrir o arquivo 
-    FILE * file = fopen("assets/lava.bmp", "rb");
+    FILE * file = fopen("assets/texture/lava.bmp", "rb");
     if (!file) {
         std::cout << "Imagem BMP nao encontrada!" << std::endl;
         return;
