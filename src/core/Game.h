@@ -19,6 +19,7 @@ public:
     Camera camera;
     Player player;
     ModelOBJ wall;
+    GLuint texturaLava;
     std::vector<AABB> worldBoxes; // Lista de hitboxes
 
     Game();
@@ -37,6 +38,7 @@ private:
     void CreateGround();
     void initializeScenario();
     void resolvePlayerCollision(float prevX, float prevY, float prevZ);
+    void carregarTexturaLava();
 };
 
 #endif

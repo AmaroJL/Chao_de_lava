@@ -46,6 +46,8 @@ void Game::Init() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0f, 800.0f/500.0f, 0.1f, 100.0f);
+
+    carregarTexturaLava();
 }
 
 // Atualiza a posição do jogador a partir das teclas WASD
@@ -136,13 +138,20 @@ void Game::CreateGround() {
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess_lava);
     glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission_lava);
 
+    glEnable(GL_TEXTURE_2D); // LIGA A TEXTURA
+    glBindTexture(GL_TEXTURE_2D, texturaLava); // SELECIONA O BMP DA LAVA
+
     glBegin(GL_QUADS);
         glNormal3f(0.0f, 1.0f, 0.0f); 
-        glVertex3f(-100.0f, mapY,  200.0f/2);
-        glVertex3f( 100.0f, mapY,  200.0f/2);
-        glVertex3f( 100.0f, mapY, -200.0f);
-        glVertex3f(-100.0f, mapY, -200.0f);
+
+        // As coordenadas 15.0f fazem a textura se repetir 15 vezes no chão gigante
+        glTexCoord2f(0.0f, 15.0f); glVertex3f(-100.0f, mapY,  200.0f/2);
+        glTexCoord2f(15.0f, 15.0f); glVertex3f( 100.0f, mapY,  200.0f/2);
+        glTexCoord2f(15.0f, 0.0f); glVertex3f( 100.0f, mapY, -200.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-100.0f, mapY, -200.0f);
     glEnd();
+
+    glDisable(GL_TEXTURE_2D); // DESLIGA PARA NÃO AFETAR AS PLATAFORMAS (PEDRAS)
 
     // Tira a emissão de luz das plataformas
     GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -294,6 +303,64 @@ void Game::initializeScenario() {
         ));
     }
 }
+
+void Game::carregarTexturaLava() {
+    // abrir o arquivo 
+    FILE * file = fopen("assets/lava.bmp", "rb");
+    if (!file) {
+        std::cout << "Imagem BMP nao encontrada!" << std::endl;
+        return;
+    }
+
+    // ler o cabeçalho de 54 bytes do BMP
+    unsigned char header[54];
+    if (fread(header, 1, 54, file) != 54 || header[0] != 'B' || header[1] != 'M') {
+        std::cout << "Nao e um arquivo BMP valido!" << std::endl;
+        fclose(file);
+        return;
+    }
+
+    // informações de tamanho
+    unsigned int dataPos    = *(int*)&(header[0x0A]); // posicao onde começam os pixels
+    unsigned int imageSize  = *(int*)&(header[0x22]); // tamanho da imagem em bytes
+    unsigned int width      = *(int*)&(header[0x12]);
+    unsigned int height     = *(int*)&(header[0x16]);
+
+
+    if (imageSize == 0)    imageSize = width * height * 3; 
+    if (dataPos == 0)      dataPos = 54; 
+
+    // ler os dados (pixels) da imagem
+    unsigned char * data = new unsigned char[imageSize];
+    fread(data, 1, imageSize, file);
+    fclose(file);
+
+    // BMP salva as cores em formato BGR. convertemos para RGB
+    for(unsigned int i = 0; i < imageSize; i += 3) {
+        unsigned char temp = data[i];     //  azul
+        data[i] = data[i+2];              // vermelho -> azul
+        data[i+2] = temp;                 // azul -> vermelho
+    }
+
+    // enviar a textura para o OpenGL
+    glGenTextures(1, &texturaLava);
+    glBindTexture(GL_TEXTURE_2D, texturaLava);
+
+    // comportamentos
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // repetir no eixo S (horizontal)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // repetir no eixo T(vertical)
+
+    // filtros da textura
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // (textura ficar menor)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // (textura ficar maior)
+
+    // envia dados (memoria -> gpu)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    delete[] data; // libera memoria
+    std::cout << "Textura carregada: " << width << "x" << height << std::endl;
+}
+
 
 // Trata teclas pressionadas
 void Game::KeyDown(unsigned char key) { input.SetKey(key, true); }
