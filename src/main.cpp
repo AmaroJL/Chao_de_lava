@@ -21,7 +21,8 @@ void specialKeysUp(int key, int x, int y) { game.SpecialKeyUp(key); }
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);  
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    // Adiciona o GLUT_STENCIL para criar o buffer de máscara
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(800, 500);
     glutInitWindowPosition(200, 0);
     glutCreateWindow("Jogo 3D");

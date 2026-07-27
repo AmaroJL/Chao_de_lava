@@ -124,12 +124,10 @@ void Game::resolvePlayerCollision(float prevX, float prevY, float prevZ) {
 void Game::CreateGround() {
     initializeScenario();
 
-    // Desenha o Chão de Lava
     GLfloat mat_ambient_lava[]   = { 0.8f, 0.2f, 0.0f, 1.0f }; 
     GLfloat mat_diffuse_lava[]   = { 0.9f, 0.3f, 0.0f, 1.0f };
     GLfloat mat_specular_lava[]  = { 0.8f, 0.8f, 0.8f, 1.0f }; 
     GLfloat mat_shininess_lava[] = { 80.0f };
-    
     GLfloat mat_emission_lava[]  = { 0.4f, 0.1f, 0.0f, 1.0f }; 
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient_lava);
@@ -138,41 +136,40 @@ void Game::CreateGround() {
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess_lava);
     glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission_lava);
 
-    glEnable(GL_TEXTURE_2D); // LIGA A TEXTURA
-    glBindTexture(GL_TEXTURE_2D, texturaLava); // SELECIONA O BMP DA LAVA
+    glEnable(GL_TEXTURE_2D); 
+    glBindTexture(GL_TEXTURE_2D, texturaLava); 
 
     glBegin(GL_QUADS);
         glNormal3f(0.0f, 1.0f, 0.0f); 
-
-        // As coordenadas 15.0f fazem a textura se repetir 15 vezes no chão gigante
         glTexCoord2f(0.0f, 15.0f); glVertex3f(-100.0f, mapY,  200.0f/2);
         glTexCoord2f(15.0f, 15.0f); glVertex3f( 100.0f, mapY,  200.0f/2);
         glTexCoord2f(15.0f, 0.0f); glVertex3f( 100.0f, mapY, -200.0f);
         glTexCoord2f(0.0f, 0.0f); glVertex3f(-100.0f, mapY, -200.0f);
     glEnd();
 
-    glDisable(GL_TEXTURE_2D); // DESLIGA PARA NÃO AFETAR AS PLATAFORMAS (PEDRAS)
+    glDisable(GL_TEXTURE_2D); 
 
-    // Tira a emissão de luz das plataformas
     GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
     
-    // Desenha as plataformas
     GLfloat mat_specular[]  = { 0.1f, 0.1f, 0.1f, 1.0f }; 
     GLfloat mat_shininess[] = { 10.0f };                 
 
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
-    // Cores das plataformas
     GLfloat corAzul[]    = { 0.0f, 0.0f, 1.0f, 1.0f };
     GLfloat corAmarelo[] = { 1.0f, 1.0f, 0.0f, 1.0f };
     GLfloat corVerde[]   = { 0.0f, 1.0f, 0.0f, 1.0f };
 
+    // Marca as plataformas no stencil buffer com o valor 1
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); 
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);         
+
     for (size_t i = 0; i < listaPedras.size(); i++) {
         const auto& p = listaPedras[i];
 
-        // Alterna a cor
         if (i % 3 == 0) {
             glMaterialfv(GL_FRONT, GL_AMBIENT, corAzul);
             glMaterialfv(GL_FRONT, GL_DIFFUSE, corAzul);
@@ -190,11 +187,13 @@ void Game::CreateGround() {
             glutSolidCube(1.0);
         glPopMatrix();
     }
+
+    glDisable(GL_STENCIL_TEST);
 }
 
-// Renderiza os elementos do jogo
 void Game::Render() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -207,19 +206,16 @@ void Game::Render() {
     CreateGround();
 
     player.Render();
-
     
-    glDisable(GL_LIGHTING); // Desativa a luz para a sombra ficar sólida e escura
-    glColor3f(0.1f, 0.1f, 0.1f); // Cor da sombra (cinza quase preto)
+    glDisable(GL_LIGHTING); 
+    glColor3f(0.1f, 0.1f, 0.1f); 
 
     glPushMatrix();
         
-        // Pega a direção da luz 
         float Lx = 0.6f;
         float Ly = 1.0f;
         float Lz = 0.5f;
 
-        // Lógica para a sombra não pular junto com o boneco
         static float alturaSombra = 4.0f;
         if (player.velY == 0.0f) { 
             alturaSombra = player.y; 
@@ -237,7 +233,14 @@ void Game::Render() {
 
         glTranslatef(0.0f, -alturaSombra, 0.0f);
 
+        // Renderiza a sombra apenas onde o stencil for igual a 1
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_EQUAL, 1, 0xFF);       
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); 
+
         player.Render();
+
+        glDisable(GL_STENCIL_TEST); 
 
     glPopMatrix();
 
