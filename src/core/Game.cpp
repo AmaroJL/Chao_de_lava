@@ -45,6 +45,8 @@ void Game::Init() {
     gluPerspective(45.0f, 800.0f/500.0f, 0.1f, 100.0f);
 
     carregarTexturaLava();
+
+    wall.load("assets/models/wall.obj");
 }
 
 // Atualiza a posição do jogador a partir das teclas WASD
@@ -199,6 +201,17 @@ void Game::Render() {
     glLightfv(GL_LIGHT0, GL_POSITION, sun_direction);
 
     CreateGround();
+
+    glPushMatrix();
+        glTranslatef(0.0f, 4.5f, -140.0f); 
+        
+        glScalef(3.0f, 3.0f, 3.0f); 
+        
+        GLfloat mat_parede[] = { 0.8f, 0.2f, 0.2f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_parede);
+
+        wall.draw();
+    glPopMatrix();
 
     player.Render();
     
