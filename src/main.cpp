@@ -1,17 +1,19 @@
 #include <GL/glut.h>
 
 #include "core/Game.h"
+#include <iostream>
 
 Game game;
 
 void display() { 
-    game.Render(); 
+    game.Render();
 }
 
 void timer(int value) { 
     game.Update(); 
     glutPostRedisplay(); 
     glutTimerFunc(16, timer, 0); 
+    
 }
 
 void keyboard(unsigned char key, int x, int y) { game.KeyDown(key); }
@@ -27,8 +29,9 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(200, 0);
     glutCreateWindow("Jogo 3D");
 
+    
     game.Init();
-
+    
     glutDisplayFunc(display);
     glutSpecialFunc(specialKeys);
     glutSpecialUpFunc(specialKeysUp);
@@ -37,7 +40,7 @@ int main(int argc, char** argv) {
     
     glutTimerFunc(0, timer, 0);
 
-    glutMainLoop();
+    glutMainLoop();    
 
     return 0;
 }

@@ -14,16 +14,13 @@ inicialização, renderização e atualização de posição
 Game::Game() {}
 Game::~Game() {}
 
-struct Pedra {
-    float x, y, z;            
-    float largura;         
-    float profundidade;    
-};
 std::vector<Pedra> listaPedras;
 float mapY = 0.3f;
 
 // Inicializa e configura o jogo
 void Game::Init() {
+    state = PLAYING;
+
     glClearColor(0.53f, 0.81f, 0.98f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
@@ -52,6 +49,8 @@ void Game::Init() {
 
 // Atualiza a posição do jogador a partir das teclas WASD
 void Game::Update() {
+    if(state != PLAYING) return;
+
     camera.Update(&input);
 
     float camYawRad = camera.yaw * M_PI / 180.0f;
@@ -77,20 +76,16 @@ void Game::Update() {
 
     mapY += 0.00041f;
     if (player.y < 0.1f) {
+        state = GAME_OVER;
         std::cout << "GAME OVER!" << std::endl;
-        player.x = 0.0f;
-        player.y = 5.0f;
-        player.z = 0.0f;
-    } else if (mapY > player.y + 0.3f && player.velY == 0) {
+    } else if (mapY > player.y + 0.3f && player.onGround) { 
+        state = GAME_OVER;
+        std::cout << "GAME OVER!" << std::endl; 
         mapY = 0.3f;
-        player.x = 0.0f;
-        player.y = 5.0f;
-        player.z = 0.0f;
     }
-    if (player.z == -135.0f && player.y == 4.0f && player.velY == 0) {
-        std::cout << "\n=================================================" << std::endl;
-        std::cout << "    VITORIA! VOCE ESCAPOU DO RIO DE LAVA!     " << std::endl;
-        std::cout << "=================================================\n" << std::endl;
+    if (player.z <= -131.0f && player.y >= 4.0f && player.onGround) {
+        std::cout << "WINNER!" << std::endl;
+        state = WON;
     }
 }
 
@@ -244,7 +239,21 @@ void Game::Render() {
 
     glPopMatrix();
 
+
     glEnable(GL_LIGHTING);
+
+    if (state == WON) {
+        desenharTextoNaTela("VITORIA! VOCE ESCAPOU DA LAVA!", 12.0f, 60.0f, 0.0f, 1.0f, 0.0f, 0.03f);
+        desenharTextoNaTela("Pressione 'R' para jogar novamente", 22.0f, 50.0f, 1.0f, 1.0f, 0.0f, 0.02f);
+
+        if(input.IsKeyPressed('r') || input.IsKeyPressed('R')) { reset(); }
+    } else if (state == GAME_OVER) {
+        desenharTextoNaTela("GAME OVER! VOCE CAIU NA LAVA", 15.0f, 60.0f, 0.0f, 1.0f, 1.0f, 0.03f);
+        desenharTextoNaTela("Pressione 'R' para tentar novamente", 22.0f, 50.0f, 1.0f, 1.0f, 0.0f, 0.02f);
+
+        if(input.IsKeyPressed('r') || input.IsKeyPressed('R')) { reset(); }
+    }
+
     glutSwapBuffers();
 }
 
@@ -280,8 +289,8 @@ void Game::initializeScenario() {
     listaPedras.push_back({-8.0f, 5.0f, -56.0f,  3.0f,  3.0f}); 
     listaPedras.push_back({-14.0f, 6.0f, -62.0f,  3.0f,  3.0f}); 
     listaPedras.push_back({-8.0f, 7.0f, -68.0f,  2.0f,  2.0f}); 
-    listaPedras.push_back({ 0.0f, 8.5f, -74.0f,  2.0f,  2.0f}); 
-    listaPedras.push_back({ 8.0f, 7.0f, -80.0f,  3.0f,  3.0f}); 
+    listaPedras.push_back({ 0.0f, 8.5f, -70.0f,  2.0f,  2.0f}); //-----
+    listaPedras.push_back({ 8.0f, 7.0f, -78.0f,  3.0f,  3.0f}); 
     listaPedras.push_back({14.0f, 5.0f, -86.0f,  3.0f,  3.0f}); 
 
     listaPedras.push_back({ 6.0f, 4.5f, -92.0f,  2.0f,  2.0f});
@@ -362,6 +371,52 @@ void Game::carregarTexturaLava() {
 
     delete[] data; // libera memoria
     std::cout << "Textura carregada: " << width << "x" << height << std::endl;
+}
+
+// Funções auxiliares para lógica de vitória
+
+void Game::desenharTextoNaTela(const char* texto, float x, float y, float r, float g, float b, float escala) {
+    glDisable(GL_LIGHTING); 
+    glDisable(GL_DEPTH_TEST);
+    
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0.0, 100.0, 0.0, 100.0); 
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    
+    glColor3f(r, g, b);
+    
+    glPushMatrix();
+        glTranslatef(x, y, 0.0f);      
+        glScalef(escala, escala, 1.0f); 
+        glLineWidth(4.0f);              
+        
+        for (const char* c = texto; *c != '\0'; c++) {
+            glutStrokeCharacter(GLUT_STROKE_ROMAN, *c);
+        }
+    glPopMatrix();
+    
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glLineWidth(1.0f); 
+}
+
+void Game::reset() {
+    state = PLAYING;
+
+    player.x = 0.0f;
+    player.y = 5.0f;
+    player.z = 0.0f;
+    player.velY = 0.0f;
 }
 
 
